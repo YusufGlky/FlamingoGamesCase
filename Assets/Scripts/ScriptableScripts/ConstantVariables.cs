@@ -6,5 +6,7 @@ using UnityEngine;
 public class ConstantVariables : ScriptableObject
 {
     [SerializeField] private int maxStackableObjects;
+    [SerializeField] private float balanceChangeDuration;
     public int MaxStackableObjects { get => maxStackableObjects; private set => maxStackableObjects = value;}
+    public float BalanceChangeDuration { get => balanceChangeDuration; private set => balanceChangeDuration = value;}
 }

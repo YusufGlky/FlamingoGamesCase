@@ -7,23 +7,8 @@ public class Overlay : MonoSingleton<Overlay>
     [Header("BalanceMeteer")]
     [SerializeField] private RectTransform meteerParent;
     [SerializeField] private RectTransform arrowRect;
-    [SerializeField] private float arrowAnimDuration;
-    [SerializeField] private float balanceValue;
-    public void BalanceSystem(float value, int direction)
+    public void BalanceMeteer(float value)
     {
-        float newValue = -(value * direction);
-        if (DOTween.IsTweening(balanceValue))
-        {
-            DOTween.Kill(balanceValue);
-        }
-        DOVirtual.Float(balanceValue, balanceValue + newValue, arrowAnimDuration, x =>
-        {
-            balanceValue = x;
-            arrowRect.localEulerAngles = new Vector3(0, 0, -(balanceValue* 180));
-            if (balanceValue <= -1 || balanceValue >= 1)
-            {
-                //To Do: Death
-            }
-        });
-    }   
+        arrowRect.localEulerAngles = new Vector3(0, 0, -(value * 180));
+    }  
 }

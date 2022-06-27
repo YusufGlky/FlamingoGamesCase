@@ -1,3 +1,4 @@
+using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,7 +9,7 @@ public abstract class Playerbase : MonoBehaviour,IClaimable
     [Header("Balance")]
     [SerializeField] private protected int leftStick;
     [SerializeField] private protected int rightStick;
-
+    [SerializeField] private float balanceValue=0.5f;
     #region ConstantVariables
     private protected PlayerValues playerValues;
     private protected ConstantVariables constantVariables;
@@ -38,13 +39,14 @@ public abstract class Playerbase : MonoBehaviour,IClaimable
         {
             case -1://Left
                 leftStick += objectAmount;
-                Overlay.Singleton.BalanceSystem(Mathf.Abs((float)objectAmount / (float)constantVariables.MaxStackableObjects),-1);
+                BalanceSystem(Mathf.Abs((float)objectAmount / (float)constantVariables.MaxStackableObjects), -1);
                 break;
             case 0://Death
+                Death();
                 break;
             case 1://Right
                 rightStick += objectAmount;
-                Overlay.Singleton.BalanceSystem(Mathf.Abs((float)objectAmount / (float)constantVariables.MaxStackableObjects), 1);
+                BalanceSystem(Mathf.Abs((float)objectAmount / (float)constantVariables.MaxStackableObjects), 1);
                 break;
         }
     }
@@ -83,6 +85,27 @@ public abstract class Playerbase : MonoBehaviour,IClaimable
             }
         }
         return _direction;
+    }
+    private void BalanceSystem(float value, int direction)
+    {
+        float newValue = -(value * direction);
+        if (DOTween.IsTweening(balanceValue))
+        {
+            DOTween.Kill(balanceValue);
+        }
+        DOVirtual.Float(balanceValue, balanceValue + newValue, constantVariables.BalanceChangeDuration, x =>
+        {
+            balanceValue = x;
+            Overlay.Singleton.BalanceMeteer(balanceValue);
+            if (balanceValue <= -1 || balanceValue >= 1)
+            {
+                Death();
+            }
+        });
+    }
+    private void Death()
+    {
+        //To Do: Death
     }
     private void TestStart()
     {

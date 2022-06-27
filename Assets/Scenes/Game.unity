@@ -2770,8 +2770,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   meteerParent: {fileID: 508908212}
   arrowRect: {fileID: 782730384}
-  arrowAnimDuration: 0.6
-  balanceValue: 0.5
 --- !u!1 &1348602692
 GameObject:
   m_ObjectHideFlags: 0
@@ -3909,6 +3907,7 @@ MonoBehaviour:
   moveable: 0
   leftStick: 0
   rightStick: 0
+  balanceValue: 0.5
 --- !u!1 &1860287806
 GameObject:
   m_ObjectHideFlags: 0
