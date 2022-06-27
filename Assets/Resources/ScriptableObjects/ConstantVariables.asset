@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: ConstantVariables
   m_EditorClassIdentifier: 
   maxStackableObjects: 100
-  balanceChangeDuration: 0.8
+  balanceChangeDuration: 1

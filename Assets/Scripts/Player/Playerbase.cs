@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class Playerbase : MonoBehaviour,IClaimable
+public abstract class Playerbase : MonoBehaviour
 {
     [SerializeField] private protected bool moveable;
     [Header("Balance")]
@@ -17,7 +17,7 @@ public abstract class Playerbase : MonoBehaviour,IClaimable
     #region privateVariables
     private Vector3 _mouseStartPos;
     private Vector3 _mouseEndPos;
-    private int _direction;
+    private int _direction=3;
     #endregion
     private void Awake()
     {
@@ -31,10 +31,19 @@ public abstract class Playerbase : MonoBehaviour,IClaimable
     private void Update()
     {
         Movement();
+        ClaimSystem();
         TestUpdate();
     }
-    public void ClaimObject(int objectAmount)
+    private void ClaimSystem()
     {
+        if (LevelManager.Singleton.CurrentObject != null)
+        {
+            ClaimObject();
+        }
+    }
+    private void ClaimObject()
+    {
+        int objectAmount = ObjectAmount();
         switch (ClaimDirection())
         {
             case -1://Left
@@ -49,6 +58,41 @@ public abstract class Playerbase : MonoBehaviour,IClaimable
                 BalanceSystem(Mathf.Abs((float)objectAmount / (float)constantVariables.MaxStackableObjects), 1);
                 break;
         }
+        _direction = 3;
+    }
+    private int ObjectAmount()
+    {
+        int givenObject=0;
+        if (LevelManager.Singleton.CurrentObject.ObjectCount >=0)
+        {
+            givenObject = LevelManager.Singleton.CurrentObject.ObjectCount;
+        }
+        else
+        {
+            if (ClaimDirection() == -1)
+            {
+                if (leftStick>=LevelManager.Singleton.CurrentObject.ObjectCount)
+                {
+                    givenObject = LevelManager.Singleton.CurrentObject.ObjectCount;
+                }
+                else
+                {
+                    givenObject = LevelManager.Singleton.CurrentObject.ObjectCount - leftStick;
+                }
+            }
+            else if (ClaimDirection()==1)
+            {
+                if (rightStick >= LevelManager.Singleton.CurrentObject.ObjectCount)
+                {
+                    givenObject = LevelManager.Singleton.CurrentObject.ObjectCount;
+                }
+                else
+                {
+                    givenObject = LevelManager.Singleton.CurrentObject.ObjectCount - rightStick;
+                }
+            }
+        }
+        return givenObject;
     }
     private void GetScriptableObjects()
     {
@@ -67,7 +111,7 @@ public abstract class Playerbase : MonoBehaviour,IClaimable
         if (Input.GetMouseButtonDown(0))
         {
             _mouseStartPos = Input.mousePosition;
-            _direction = 0;
+            _direction = 3;
         }
         if (Input.GetMouseButtonUp(0))
         {
@@ -89,11 +133,15 @@ public abstract class Playerbase : MonoBehaviour,IClaimable
     private void BalanceSystem(float value, int direction)
     {
         float newValue = -(value * direction);
+        BalanceValue(balanceValue + newValue,constantVariables.BalanceChangeDuration);
+    }
+    private void BalanceValue(float value,float changeDuration)
+    {
         if (DOTween.IsTweening(balanceValue))
         {
             DOTween.Kill(balanceValue);
         }
-        DOVirtual.Float(balanceValue, balanceValue + newValue, constantVariables.BalanceChangeDuration, x =>
+        DOVirtual.Float(balanceValue, value, changeDuration, x =>
         {
             balanceValue = x;
             Overlay.Singleton.BalanceMeteer(balanceValue);
@@ -129,11 +177,9 @@ public abstract class Playerbase : MonoBehaviour,IClaimable
         }
         if (Input.GetKeyDown(KeyCode.A))//LeftStick
         {
-            ClaimObject(10);
         }
         if (Input.GetKeyDown(KeyCode.D))//RightStick
         {
-            ClaimObject(-30);
         }
     }
 
