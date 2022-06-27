@@ -9,7 +9,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 87cfadf6c26a6824786c6709b9f0559a, type: 3}
-  m_Name: PlayerValues
+  m_Script: {fileID: 11500000, guid: 9ada151f6ea97544c8304cae56686a41, type: 3}
+  m_Name: ConstantVariables
   m_EditorClassIdentifier: 
-  playerSpeed: 8
