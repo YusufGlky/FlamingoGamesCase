@@ -12,3 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9ada151f6ea97544c8304cae56686a41, type: 3}
   m_Name: ConstantVariables
   m_EditorClassIdentifier: 
+  maxStackableObjects: 100
