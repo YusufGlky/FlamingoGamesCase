@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxStackableObjects: 100
   balanceChangeDuration: 1
-  newObjectHolderPosZInterval: 10
+  newObjectHolderPosZInterval: 25
   objectMoveDuration: 0.23
   objectMoveDelay: 0.02
   objectMinusAnimDuration: 0.3

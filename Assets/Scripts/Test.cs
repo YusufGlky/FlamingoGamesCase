@@ -4,14 +4,23 @@ using UnityEngine;
 [ExecuteInEditMode]
 public class Test : MonoBehaviour
 {
-    [SerializeField] private int groundPizza;
-    [SerializeField] private int myPizza;
-    [SerializeField] private int result;
+    [SerializeField] private float leftStick;
+    [SerializeField] private float rightStick;
+    [SerializeField] private float balance;
     private void Update()
     {
-        result = (groundPizza + myPizza)-myPizza;
-    }
-    private void ArrowRotate()
-    {
+        
+        if (leftStick==rightStick)
+        {
+            balance = Mathf.MoveTowards(balance, 0.5f, Mathf.Abs(leftStick - rightStick) * Time.deltaTime);
+        }
+        else if (leftStick > rightStick)
+        {
+            balance = Mathf.MoveTowards(balance, 0, Mathf.Abs(leftStick - rightStick) * Time.deltaTime);
+        }
+        else if (leftStick < rightStick)
+        {
+            balance = Mathf.MoveTowards(balance, 1, Mathf.Abs(leftStick - rightStick) * Time.deltaTime);
+        }
     }
 }

@@ -1,5 +1,4 @@
 using DG.Tweening;
-using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -34,6 +33,8 @@ public abstract class ObjectBase : MonoBehaviour,IPooledObject
     {
         ScaleAnim();
         myObjects = new List<Transform>();
+        _instantAnimIndex = 0;
+
         if (stackCount > 0)
         {
             for (int i = 0; i < stackCount; i++)
@@ -91,6 +92,10 @@ public abstract class ObjectBase : MonoBehaviour,IPooledObject
              if (_instantAnimIndex < myObjects.Count)
              {
                  Transform tempObject = myObjects[_instantAnimIndex];
+                 if (DOTween.IsTweening(tempObject.localPosition))
+                 {
+                     DOTween.Kill(tempObject.localPosition);
+                 }
                  _height = ObjectComponentHandler.MeshHeight(tempObject.GetComponent<Renderer>())* _instantAnimIndex;
                  tempObject.DOLocalMoveY(_height, _constantVariables.ObjectMoveDuration);
                  _instantAnimIndex++;
@@ -142,19 +147,20 @@ public abstract class ObjectBase : MonoBehaviour,IPooledObject
     private void CreateNewHolderAndReturnPool()
     {
         ObjectPool.Singleton.PutObject(PoolType, PoolId, gameObject);
-        ObjectManager.Singleton.SpawnNewObjectHolder(new Vector2Int(-5,-5));
+        ObjectManager.Singleton.SpawnNewObjectHolder();
     }
     private void SetText(int amount)
     {
         if (amount > 0)
         {
             objectCountText.text = "+" + amount.ToString();
+            objectCountText.DOColor(new Color(0,0.7f,1,1), 0.1f);
         }
         else
         {
             objectCountText.text = amount.ToString();
+            objectCountText.DOColor(Color.red, 0.1f);
         }
-        objectCountText.transform.localPosition = Vector3.up * (_height+.5f);
     }
     private void ScaleAnim()
     {

@@ -11,11 +11,15 @@ public abstract class Playerbase : MonoBehaviour
     [SerializeField] private protected int leftStick;
     [SerializeField] private protected int rightStick;
     [SerializeField] private float balanceValue=0.5f;
+
     [Header("Stick")]
     [SerializeField] private List<Transform> leftStickObjects;
     [SerializeField] private List<Transform> rightStickObjects;
     [SerializeField] private Transform leftStickTransform;
     [SerializeField] private Transform rightStickTransform;
+
+    [Header("Shoe")]
+    [SerializeField] private GameObject skate;
     #region ConstantVariables
     private protected PlayerValues playerValues;
     private protected ConstantVariables constantVariables;
@@ -24,10 +28,12 @@ public abstract class Playerbase : MonoBehaviour
     private Vector3 _mouseStartPos;
     private Vector3 _mouseEndPos;
     #endregion
+    #region Components
+    [SerializeField] private Animator mAnim;
+    #endregion
     private void Awake()
     {
         Setup();
-        TestStart();
     }
     private void OnEnable()
     {
@@ -41,22 +47,30 @@ public abstract class Playerbase : MonoBehaviour
     {
         Movement();
         ClaimSystem();
-        TestUpdate();
     }
     private void Setup()
     {
         GetScriptableObjects();
+        mAnim.speed = 0;
     }
     private void SetActions(bool enabled)
     {
         if (enabled)
         {
             ObjectManager.MoveFinisherAction += CheckSticks;
+            Gamemanager.PlayAction += Play;
         }
         else
         {
             ObjectManager.MoveFinisherAction -= CheckSticks;
+            Gamemanager.PlayAction -= Play;
         }
+    }
+    private void Play()
+    {
+        skate.SetActive(true);
+        mAnim.speed = 1;
+        moveable = true;
     }
     private void GetScriptableObjects()
     {
@@ -65,7 +79,7 @@ public abstract class Playerbase : MonoBehaviour
     }
     private void ClaimSystem()
     {
-        if (ObjectManager.Singleton.CurrentObject != null)
+        if (ObjectManager.Singleton.CurrentObject != null&&moveable)
         {
             if (!ObjectManager.Singleton.CurrentObject.IsUsed)
             {
@@ -92,8 +106,13 @@ public abstract class Playerbase : MonoBehaviour
             {
                 ObjectMoveToGround(objectAmount, direction);
             }
-            BalanceSystem((float)objectAmount / (float)constantVariables.MaxStackableObjects, direction);
+            BalanceSystem((float) objectAmount / (float)constantVariables.MaxStackableObjects, direction);
+            UpdateLevelManager();
         }
+    }
+    private void UpdateLevelManager()
+    {
+        LevelManager.Singleton.UpdateStickObjectCount(leftStick, rightStick);
     }
     private int ObjectAmount(int direction)
     {
@@ -180,7 +199,6 @@ public abstract class Playerbase : MonoBehaviour
             }
         });
     }
-    public float test;
     private void CheckSticks()
     {
         leftStickObjects.Clear();
@@ -227,30 +245,5 @@ public abstract class Playerbase : MonoBehaviour
     private void Death()
     {
         //To Do: Death
-    }
-    private void TestStart()
-    {
-        if (LevelManager.Singleton.TestStart)
-        {
-            moveable = true;
-        }
-    }
-    private void TestUpdate()
-    {
-        if (LevelManager.Singleton.TestUpdate)
-        {
-            if (Input.GetKey(KeyCode.LeftArrow))
-            {
-            }
-            if (Input.GetKey(KeyCode.RightArrow))
-            {
-            }
-        }
-        if (Input.GetKeyDown(KeyCode.A))//LeftStick
-        {
-        }
-        if (Input.GetKeyDown(KeyCode.D))//RightStick
-        {
-        }
     }
 }

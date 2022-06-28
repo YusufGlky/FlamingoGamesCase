@@ -6,8 +6,12 @@ public class LevelManager : MonoSingleton<LevelManager>
 {
     [Header("Player")]
     [SerializeField] private Transform playerTransform;
+    [SerializeField] private int leftStickObjects;
+    [SerializeField] private int rightStickObjects;
     #region Properties
     public Transform PlayerTransform { get => playerTransform; private set => playerTransform = value; }
+    public int LeftStickObjects { get => leftStickObjects; private set => leftStickObjects = value; }
+    public int RightStickObjects { get => rightStickObjects; private set => rightStickObjects = value; }
     #endregion
     #region TestVariables
     [Header("Test")]
@@ -19,6 +23,11 @@ public class LevelManager : MonoSingleton<LevelManager>
     private void Awake()
     {
         Setup();
+    }
+    public void UpdateStickObjectCount(int leftStick, int rightStick)
+    {
+        LeftStickObjects = leftStick;
+        RightStickObjects = rightStick;
     }
     private void Setup()
     {
