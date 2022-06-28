@@ -11,6 +11,7 @@ public abstract class Playerbase : MonoBehaviour
     [SerializeField] private protected int leftStick;
     [SerializeField] private protected int rightStick;
     [SerializeField] private float balanceValue=0.5f;
+    [SerializeField] private float balanceSpeed;
 
     [Header("Stick")]
     [SerializeField] private List<Transform> leftStickObjects;
@@ -47,6 +48,7 @@ public abstract class Playerbase : MonoBehaviour
     {
         Movement();
         ClaimSystem();
+        BalanceSystem();
     }
     private void Setup()
     {
@@ -106,7 +108,6 @@ public abstract class Playerbase : MonoBehaviour
             {
                 ObjectMoveToGround(objectAmount, direction);
             }
-            BalanceSystem((float) objectAmount / (float)constantVariables.MaxStackableObjects, direction);
             UpdateLevelManager();
         }
     }
@@ -178,26 +179,35 @@ public abstract class Playerbase : MonoBehaviour
             }
         }
     }
-    private void BalanceSystem(float value, int direction)
+    private void BalanceSystem()
     {
-        float newValue = (value * direction);
-        BalanceValue(balanceValue + newValue,constantVariables.BalanceChangeDuration);
-    }
-    private void BalanceValue(float value,float changeDuration)
-    {
-        if (DOTween.IsTweening(balanceValue))
+        if (!moveable)
         {
-            DOTween.Kill(balanceValue);
+            return;
         }
-        DOVirtual.Float(balanceValue, value, changeDuration, x =>
+        if (leftStick == rightStick)
         {
-            balanceValue = x;
-            Overlay.Singleton.BalanceMeteer(balanceValue);
-            if (balanceValue <= -1 || balanceValue >= 1)
+            balanceSpeed -= constantVariables.BalanceChangeDuration*Time.deltaTime;
+            balanceValue = Mathf.MoveTowards(balanceValue, 0.5f, balanceSpeed * Time.deltaTime);
+        }
+        else
+        {
+            if (leftStick > rightStick)
             {
-                Death();
+                balanceValue = Mathf.MoveTowards(balanceValue, 0, balanceSpeed * Time.deltaTime);
             }
-        });
+            else if (rightStick > leftStick)
+            {
+                balanceValue = Mathf.MoveTowards(balanceValue, 1, balanceSpeed * Time.deltaTime);
+            }
+            balanceSpeed += constantVariables.BalanceChangeDuration * Time.deltaTime;
+        }
+        balanceSpeed = Mathf.Clamp(balanceSpeed, 0, 1);
+        Overlay.Singleton.BalanceMeteer(balanceValue);
+        if (balanceValue <= -1 || balanceValue >= 1)
+        {
+            Death();
+        }
     }
     private void CheckSticks()
     {
