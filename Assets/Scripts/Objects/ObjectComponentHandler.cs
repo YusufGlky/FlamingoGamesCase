@@ -6,6 +6,6 @@ public class ObjectComponentHandler : MonoBehaviour
 {
     public static float MeshHeight(Renderer renderer)
     {
-        return renderer.bounds.extents.y;
+        return renderer.bounds.size.y;
     }
 }

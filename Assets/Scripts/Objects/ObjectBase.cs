@@ -91,7 +91,7 @@ public abstract class ObjectBase : MonoBehaviour,IPooledObject
              if (_instantAnimIndex < myObjects.Count)
              {
                  Transform tempObject = myObjects[_instantAnimIndex];
-                 _height = ObjectComponentHandler.MeshHeight(tempObject.GetComponent<Renderer>()) * 2 * _instantAnimIndex;
+                 _height = ObjectComponentHandler.MeshHeight(tempObject.GetComponent<Renderer>())* _instantAnimIndex;
                  tempObject.DOLocalMoveY(_height, _constantVariables.ObjectMoveDuration);
                  _instantAnimIndex++;
                  SetText(_instantAnimIndex);
@@ -107,18 +107,16 @@ public abstract class ObjectBase : MonoBehaviour,IPooledObject
             if (_moveToPlayerIndex>-1)
             {
                 Transform tempObject = myObjects[_moveToPlayerIndex];
-                tempObject.SetParent(target);
-                if (DOTween.IsTweening(tempObject))
-                {
-                    DOTween.Kill(tempObject);
-                }
-                tempObject.DOLocalMove(Vector3.zero, _constantVariables.ObjectMoveDuration);
+                SetObject(tempObject, target);
+
                 myObjects.RemoveAt(_moveToPlayerIndex);
+
                 _moveToPlayerIndex--;
-                _height -= ObjectComponentHandler.MeshHeight(tempObject.GetComponent<Renderer>()) * 2;
+                _height -= ObjectComponentHandler.MeshHeight(tempObject.GetComponent<Renderer>());
+
                 SetText(myObjects.Count);
-                ObjectManager.Singleton.MoveFinisher();
                 MoveToPlayerTarget(target);
+                ObjectManager.Singleton.MoveFinisher();
             }
             else
             {
@@ -129,6 +127,17 @@ public abstract class ObjectBase : MonoBehaviour,IPooledObject
                 }
             }
         });
+    }
+    private void SetObject(Transform tempObject,Transform target)
+    {
+        if (DOTween.IsTweening(tempObject))
+        {
+            DOTween.Kill(tempObject);
+        }
+
+        tempObject.SetParent(target);
+        tempObject.DOScale(tempObject.localScale / 2, _constantVariables.ObjectMoveDuration);
+        tempObject.DOLocalMove(Vector3.zero, _constantVariables.ObjectMoveDuration);
     }
     private void CreateNewHolderAndReturnPool()
     {

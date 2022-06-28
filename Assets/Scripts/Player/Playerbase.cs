@@ -92,7 +92,7 @@ public abstract class Playerbase : MonoBehaviour
             {
                 ObjectMoveToGround(objectAmount, direction);
             }
-            BalanceSystem(Mathf.Abs((float)objectAmount / (float)constantVariables.MaxStackableObjects), direction);
+            BalanceSystem((float)objectAmount / (float)constantVariables.MaxStackableObjects, direction);
         }
     }
     private int ObjectAmount(int direction)
@@ -161,7 +161,7 @@ public abstract class Playerbase : MonoBehaviour
     }
     private void BalanceSystem(float value, int direction)
     {
-        float newValue = -(value * direction);
+        float newValue = (value * direction);
         BalanceValue(balanceValue + newValue,constantVariables.BalanceChangeDuration);
     }
     private void BalanceValue(float value,float changeDuration)
@@ -180,24 +180,22 @@ public abstract class Playerbase : MonoBehaviour
             }
         });
     }
+    public float test;
     private void CheckSticks()
     {
         leftStickObjects.Clear();
         rightStickObjects.Clear();
         Transform child = null;
-        Renderer childRenderer = null;
         for (int i = 0; i < leftStickTransform.childCount; i++)
         {
             child = leftStickTransform.GetChild(i);
-            childRenderer = child.GetComponent<Renderer>();
-            child.DOLocalMoveY(ObjectComponentHandler.MeshHeight(childRenderer)*2*i, constantVariables.ObjectMoveDuration);
+            child.DOLocalMoveY(0.05f * i, constantVariables.ObjectMoveDuration);
             leftStickObjects.Add(child);
         }
         for (int i = 0; i < rightStickTransform.childCount; i++)
         {
             child = rightStickTransform.GetChild(i);
-            childRenderer = child.GetComponent<Renderer>();
-            child.DOLocalMoveY(ObjectComponentHandler.MeshHeight(childRenderer) * 2 * i, constantVariables.ObjectMoveDuration);
+            child.DOLocalMoveY(0.05f * i, constantVariables.ObjectMoveDuration);
             rightStickObjects.Add(child);
         }
     }
