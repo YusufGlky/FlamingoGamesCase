@@ -22,6 +22,7 @@ public abstract class Playerbase : MonoBehaviour
     #region privateVariables
     private Vector3 _mouseStartPos;
     private Vector3 _mouseEndPos;
+    private int _objectIndex;
     #endregion
     private void Awake()
     {
@@ -41,11 +42,19 @@ public abstract class Playerbase : MonoBehaviour
         leftStickObjects = new Stack<Transform>();
         rightStickObjects = new Stack<Transform>();
     }
+    private void GetScriptableObjects()
+    {
+        playerValues = Resources.Load<PlayerValues>("ScriptableObjects/Player/PlayerValues");
+        constantVariables = Resources.Load<ConstantVariables>("ScriptableObjects/ConstantVariables");
+    }
     private void ClaimSystem()
     {
         if (LevelManager.Singleton.CurrentObject != null)
         {
-            ClaimDirection();
+            if (!LevelManager.Singleton.CurrentObject.IsUsed)
+            {
+                ClaimDirection();
+            }
         }
     }
     private void ClaimObject(int direction)
@@ -56,10 +65,12 @@ public abstract class Playerbase : MonoBehaviour
             if (direction == -1)
             {
                 leftStick += objectAmount;
+                LevelManager.Singleton.CurrentObject.ObjectsHolderToPlayer(objectAmount, leftStickTransform);
             }
             else
             {
                 rightStick += objectAmount;
+                LevelManager.Singleton.CurrentObject.ObjectsHolderToPlayer(objectAmount, rightStickTransform);
             }
             BalanceSystem(Mathf.Abs((float)objectAmount / (float)constantVariables.MaxStackableObjects), direction);
         }
@@ -103,11 +114,6 @@ public abstract class Playerbase : MonoBehaviour
             }
         }
         return givenObject;
-    }
-    private void GetScriptableObjects()
-    {
-        playerValues = Resources.Load<PlayerValues>("ScriptableObjects/Player/PlayerValues");
-        constantVariables = Resources.Load<ConstantVariables>("ScriptableObjects/ConstantVariables");
     }
     private void Movement()
     {

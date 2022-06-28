@@ -15,4 +15,4 @@ MonoBehaviour:
   maxStackableObjects: 100
   balanceChangeDuration: 1
   newObjectHolderPosZInterval: 10
-  objectMoveToStickDuration: 0.6
+  objectMoveDuration: 0.23

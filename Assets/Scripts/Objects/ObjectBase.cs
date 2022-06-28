@@ -11,7 +11,10 @@ public abstract class ObjectBase : MonoBehaviour,IPooledObject
     [SerializeField] private TextMeshPro objectCountText;
     [Header("Objects")]
     [SerializeField] private List<Transform> myObjects;
+    [Header("Properties")]
+    [SerializeField] private bool isUsed;
     public int ObjectCount { get => objectCount; private set { objectCount = value; } }
+    public bool IsUsed { get => isUsed;private set { isUsed = value;} }
 
     #region PoolId
     public string PoolType { get; set; }
@@ -20,6 +23,7 @@ public abstract class ObjectBase : MonoBehaviour,IPooledObject
     #region PrivateVariables
     private float _height;
     private int _instantAnimIndex;
+    private int _moveToPlayerIndex;
     private ConstantVariables _constantVariables;
     #endregion
     private void Awake()
@@ -38,8 +42,28 @@ public abstract class ObjectBase : MonoBehaviour,IPooledObject
             tempObject.localPosition = Vector3.zero;
             myObjects.Add(tempObject);
         }
+        myObjects.Reverse();
         ObjectInstantAnimations();
         ObjectCount = stackCount;
+    }
+    public void ObjectsHolderToPlayer(int count,Transform target)
+    {
+        if (ObjectCount > 0)
+        {
+            _moveToPlayerIndex = myObjects.Count - 1;
+            MoveToPlayerTarget(target);
+
+            IsUsed = true;
+            ObjectCount -= count;
+        }
+        else
+        {
+            ObjectCount += count;
+            if (ObjectCount==0)
+            {
+                IsUsed = true;
+            }
+        }
     }
     private void Setup()
     {
@@ -60,6 +84,33 @@ public abstract class ObjectBase : MonoBehaviour,IPooledObject
                  ObjectInstantAnimations();
              }
          });
+    }
+    private void MoveToPlayerTarget(Transform target)
+    {
+        DOVirtual.DelayedCall(0.06f, () =>
+        {
+            if (_moveToPlayerIndex>-1)
+            {
+                Transform tempObject = myObjects[_moveToPlayerIndex];
+                tempObject.SetParent(target);
+                if (DOTween.IsTweening(tempObject))
+                {
+                    DOTween.Kill(tempObject);
+                }
+                tempObject.DOLocalMove(Vector3.zero, _constantVariables.ObjectMoveDuration);
+                myObjects.RemoveAt(_moveToPlayerIndex);
+                _moveToPlayerIndex--;
+                SetText(myObjects.Count);
+                MoveToPlayerTarget(target);
+            }
+            else
+            {
+                if (ObjectCount==0)
+                {
+                    //Destroy
+                }
+            }
+        });
     }
     private void CreateNewHolderAndReturnPool()
     {
