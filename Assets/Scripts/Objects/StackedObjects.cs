@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using DG.Tweening;
 public class StackedObjects : MonoBehaviour,IPooledObject
 {
     private Collider _mCollider;
@@ -31,8 +31,15 @@ public class StackedObjects : MonoBehaviour,IPooledObject
         _mRigidbody.isKinematic = true;
         _mRigidbody.constraints = RigidbodyConstraints.FreezeAll;
     }
-    public void ReturnToPool()
+    public void MoveGroundAndReturnToPool(int direction, float delay)
     {
-        ObjectPool.Singleton.PutObject(PoolType, PoolId, gameObject);
+        DOVirtual.DelayedCall(delay, () =>
+         {
+             transform.SetParent(null);
+             transform.DOMove(transform.position + new Vector3(5 * direction, -5, 0), 1).OnComplete(() =>
+             {
+                 ObjectPool.Singleton.PutObject(PoolType, PoolId, gameObject);
+             });
+         });
     }
 }

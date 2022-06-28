@@ -16,3 +16,5 @@ MonoBehaviour:
   balanceChangeDuration: 1
   newObjectHolderPosZInterval: 10
   objectMoveDuration: 0.23
+  objectMoveDelay: 0.02
+  objectMinusAnimDuration: 0.3

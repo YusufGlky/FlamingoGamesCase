@@ -1,6 +1,7 @@
 using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public abstract class Playerbase : MonoBehaviour
@@ -11,8 +12,8 @@ public abstract class Playerbase : MonoBehaviour
     [SerializeField] private protected int rightStick;
     [SerializeField] private float balanceValue=0.5f;
     [Header("Stick")]
-    [SerializeField] private Stack<Transform> leftStickObjects;
-    [SerializeField] private Stack<Transform> rightStickObjects;
+    [SerializeField] private List<Transform> leftStickObjects;
+    [SerializeField] private List<Transform> rightStickObjects;
     [SerializeField] private Transform leftStickTransform;
     [SerializeField] private Transform rightStickTransform;
     #region ConstantVariables
@@ -22,12 +23,19 @@ public abstract class Playerbase : MonoBehaviour
     #region privateVariables
     private Vector3 _mouseStartPos;
     private Vector3 _mouseEndPos;
-    private int _objectIndex;
     #endregion
     private void Awake()
     {
         Setup();
         TestStart();
+    }
+    private void OnEnable()
+    {
+        SetActions(true); 
+    }
+    private void OnDisable()
+    {
+        SetActions(false);
     }
     private void Update()
     {
@@ -38,9 +46,17 @@ public abstract class Playerbase : MonoBehaviour
     private void Setup()
     {
         GetScriptableObjects();
-
-        leftStickObjects = new Stack<Transform>();
-        rightStickObjects = new Stack<Transform>();
+    }
+    private void SetActions(bool enabled)
+    {
+        if (enabled)
+        {
+            ObjectManager.MoveFinisherAction += CheckSticks;
+        }
+        else
+        {
+            ObjectManager.MoveFinisherAction -= CheckSticks;
+        }
     }
     private void GetScriptableObjects()
     {
@@ -49,9 +65,9 @@ public abstract class Playerbase : MonoBehaviour
     }
     private void ClaimSystem()
     {
-        if (LevelManager.Singleton.CurrentObject != null)
+        if (ObjectManager.Singleton.CurrentObject != null)
         {
-            if (!LevelManager.Singleton.CurrentObject.IsUsed)
+            if (!ObjectManager.Singleton.CurrentObject.IsUsed)
             {
                 ClaimDirection();
             }
@@ -65,12 +81,16 @@ public abstract class Playerbase : MonoBehaviour
             if (direction == -1)
             {
                 leftStick += objectAmount;
-                LevelManager.Singleton.CurrentObject.ObjectsHolderToPlayer(objectAmount, leftStickTransform);
+                ObjectManager.Singleton.CurrentObject.ObjectsHolderToPlayer(objectAmount, leftStickTransform);
             }
             else
             {
                 rightStick += objectAmount;
-                LevelManager.Singleton.CurrentObject.ObjectsHolderToPlayer(objectAmount, rightStickTransform);
+                ObjectManager.Singleton.CurrentObject.ObjectsHolderToPlayer(objectAmount, rightStickTransform);
+            }
+            if (ObjectManager.Singleton.CurrentObject.ObjectCount < 0)
+            {
+                ObjectMoveToGround(objectAmount, direction);
             }
             BalanceSystem(Mathf.Abs((float)objectAmount / (float)constantVariables.MaxStackableObjects), direction);
         }
@@ -78,41 +98,36 @@ public abstract class Playerbase : MonoBehaviour
     private int ObjectAmount(int direction)
     {
         int givenObject=0;
-        if (LevelManager.Singleton.CurrentObject.ObjectCount >0)
+        if (ObjectManager.Singleton.CurrentObject.ObjectCount >0)
         {
-            givenObject = LevelManager.Singleton.CurrentObject.ObjectCount;
+            givenObject = ObjectManager.Singleton.CurrentObject.ObjectCount;
         }
         else
         {
             if (direction == -1)
             {
-                if (leftStick > 0)
+                if (Mathf.Abs(ObjectManager.Singleton.CurrentObject.ObjectCount) >= leftStick)
                 {
-                    if (leftStick >= LevelManager.Singleton.CurrentObject.ObjectCount)
-                    {
-                        givenObject = LevelManager.Singleton.CurrentObject.ObjectCount;
-                    }
-                    else
-                    {
-                        givenObject =LevelManager.Singleton.CurrentObject.ObjectCount+ leftStick;
-                    }
+                    givenObject = -leftStick;
+                }
+                else
+                {
+                    givenObject = (ObjectManager.Singleton.CurrentObject.ObjectCount + leftStick) - leftStick;
                 }
             }
             else if (direction == 1)
             {
-                if (rightStick > 0)
+                if (Mathf.Abs(ObjectManager.Singleton.CurrentObject.ObjectCount)>=rightStick)
                 {
-                    if (rightStick >= LevelManager.Singleton.CurrentObject.ObjectCount)
-                    {
-                        givenObject = LevelManager.Singleton.CurrentObject.ObjectCount;
-                    }
-                    else
-                    {
-                        givenObject = LevelManager.Singleton.CurrentObject.ObjectCount + rightStick;
-                    }
+                    givenObject = -rightStick;
+                }
+                else
+                {
+                    givenObject =(ObjectManager.Singleton.CurrentObject.ObjectCount + rightStick)-rightStick;
                 }
             }
         }
+        Debug.LogError("GivenObject:" + givenObject);
         return givenObject;
     }
     private void Movement()
@@ -164,6 +179,52 @@ public abstract class Playerbase : MonoBehaviour
                 Death();
             }
         });
+    }
+    private void CheckSticks()
+    {
+        leftStickObjects.Clear();
+        rightStickObjects.Clear();
+        Transform child = null;
+        Renderer childRenderer = null;
+        for (int i = 0; i < leftStickTransform.childCount; i++)
+        {
+            child = leftStickTransform.GetChild(i);
+            childRenderer = child.GetComponent<Renderer>();
+            child.DOLocalMoveY(ObjectComponentHandler.MeshHeight(childRenderer)*2*i, constantVariables.ObjectMoveDuration);
+            leftStickObjects.Add(child);
+        }
+        for (int i = 0; i < rightStickTransform.childCount; i++)
+        {
+            child = rightStickTransform.GetChild(i);
+            childRenderer = child.GetComponent<Renderer>();
+            child.DOLocalMoveY(ObjectComponentHandler.MeshHeight(childRenderer) * 2 * i, constantVariables.ObjectMoveDuration);
+            rightStickObjects.Add(child);
+        }
+    }
+    private void ObjectMoveToGround(int count,int direction)
+    {
+        Transform child = null;
+        List<Transform> removedList = new List<Transform>();
+        leftStickObjects = leftStickObjects.OrderByDescending(x => x.position.y).ToList();
+        rightStickObjects = rightStickObjects.OrderByDescending(x => x.position.y).ToList();
+        for (int i = 0; i < Mathf.Abs(count); i++)
+        {
+            if (direction == -1)
+            {
+                child = leftStickObjects[i];
+                child.GetComponent<StackedObjects>().MoveGroundAndReturnToPool(-1,constantVariables.ObjectMoveDelay*i);
+            }
+            else
+            {
+                child = rightStickObjects[i];
+                child.GetComponent<StackedObjects>().MoveGroundAndReturnToPool(1, constantVariables.ObjectMoveDelay * i);
+            }
+            removedList.Add(child);
+        }
+        for (int i = 0; i < removedList.Count; i++)
+        {
+            leftStickObjects.Remove(removedList[i]);
+        }
     }
     private void Death()
     {

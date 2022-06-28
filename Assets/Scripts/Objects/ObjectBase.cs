@@ -34,19 +34,28 @@ public abstract class ObjectBase : MonoBehaviour,IPooledObject
     {
         ScaleAnim();
         myObjects = new List<Transform>();
-        for (int i = 0; i <stackCount; i++)
+        if (stackCount > 0)
         {
-            Transform tempObject = ObjectPool.Singleton.GetObject(objectPoolType, objectPoolId).transform;
-            tempObject.SetParent(transform);
-            tempObject.DOScale(Vector3.one, 0.3f);
-            tempObject.localPosition = Vector3.zero;
-            myObjects.Add(tempObject);
+            for (int i = 0; i < stackCount; i++)
+            {
+                Transform tempObject = ObjectPool.Singleton.GetObject(objectPoolType, objectPoolId).transform;
+                tempObject.GetComponent<StackedObjects>().DisableComponents();
+                tempObject.SetParent(transform);
+                tempObject.DOScale(Vector3.one, 0.3f);
+                tempObject.localPosition = Vector3.zero;
+                myObjects.Add(tempObject);
+            }
+            myObjects.Reverse();
+            ObjectInstantAnimations();
         }
-        myObjects.Reverse();
-        ObjectInstantAnimations();
+        else
+        {
+            SetText(stackCount);
+        }
+        IsUsed = false;
         ObjectCount = stackCount;
     }
-    public void ObjectsHolderToPlayer(int count,Transform target)
+    public void ObjectsHolderToPlayer(int count, Transform target)
     {
         if (ObjectCount > 0)
         {
@@ -58,11 +67,17 @@ public abstract class ObjectBase : MonoBehaviour,IPooledObject
         }
         else
         {
-            ObjectCount += count;
-            if (ObjectCount==0)
-            {
-                IsUsed = true;
-            }
+            DOVirtual.Int(ObjectCount, ObjectCount - count, _constantVariables.ObjectMinusAnimDuration, x =>
+                 {
+                     ObjectCount = x;
+                     SetText(x);
+
+                     if (ObjectCount == 0&&!IsUsed)
+                     {
+                         IsUsed = true;
+                         CreateNewHolderAndReturnPool();
+                     }
+                 });
         }
     }
     private void Setup()
@@ -71,13 +86,13 @@ public abstract class ObjectBase : MonoBehaviour,IPooledObject
     }
     private void ObjectInstantAnimations()
     {
-        DOVirtual.DelayedCall(0.06f, () =>
+        DOVirtual.DelayedCall(_constantVariables.ObjectMoveDelay, () =>
          {
              if (_instantAnimIndex < myObjects.Count)
              {
                  Transform tempObject = myObjects[_instantAnimIndex];
-                 _height = ObjectComponentHandler.MeshHeight(tempObject.GetComponent<Renderer>()) * 2;
-                 tempObject.DOLocalMoveY(_height * _instantAnimIndex, _constantVariables.ObjectMoveDuration);
+                 _height = ObjectComponentHandler.MeshHeight(tempObject.GetComponent<Renderer>()) * 2 * _instantAnimIndex;
+                 tempObject.DOLocalMoveY(_height, _constantVariables.ObjectMoveDuration);
                  _instantAnimIndex++;
                  SetText(_instantAnimIndex);
 
@@ -87,7 +102,7 @@ public abstract class ObjectBase : MonoBehaviour,IPooledObject
     }
     private void MoveToPlayerTarget(Transform target)
     {
-        DOVirtual.DelayedCall(0.06f, () =>
+        DOVirtual.DelayedCall(_constantVariables.ObjectMoveDelay, () =>
         {
             if (_moveToPlayerIndex>-1)
             {
@@ -100,13 +115,16 @@ public abstract class ObjectBase : MonoBehaviour,IPooledObject
                 tempObject.DOLocalMove(Vector3.zero, _constantVariables.ObjectMoveDuration);
                 myObjects.RemoveAt(_moveToPlayerIndex);
                 _moveToPlayerIndex--;
+                _height -= ObjectComponentHandler.MeshHeight(tempObject.GetComponent<Renderer>()) * 2;
                 SetText(myObjects.Count);
+                ObjectManager.Singleton.MoveFinisher();
                 MoveToPlayerTarget(target);
             }
             else
             {
                 if (ObjectCount==0)
                 {
+                    CreateNewHolderAndReturnPool();
                     //Destroy
                 }
             }
@@ -115,8 +133,7 @@ public abstract class ObjectBase : MonoBehaviour,IPooledObject
     private void CreateNewHolderAndReturnPool()
     {
         ObjectPool.Singleton.PutObject(PoolType, PoolId, gameObject);
-        ObjectSpawnManager.Singleton.SpawnObjectAndSetPosition(-5);
-        Debug.LogError("PutBackObjectHolder");
+        ObjectManager.Singleton.SpawnNewObjectHolder(new Vector2Int(-5,-5));
     }
     private void SetText(int amount)
     {
@@ -128,7 +145,7 @@ public abstract class ObjectBase : MonoBehaviour,IPooledObject
         {
             objectCountText.text = amount.ToString();
         }
-        objectCountText.transform.localPosition = Vector3.up * (_height + 1.2f);
+        objectCountText.transform.localPosition = Vector3.up * (_height+.5f);
     }
     private void ScaleAnim()
     {

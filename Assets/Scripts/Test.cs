@@ -4,15 +4,14 @@ using UnityEngine;
 [ExecuteInEditMode]
 public class Test : MonoBehaviour
 {
-    [SerializeField] private float value;
-    [SerializeField] private RectTransform arrowRect;
+    [SerializeField] private int groundPizza;
+    [SerializeField] private int myPizza;
+    [SerializeField] private int result;
     private void Update()
     {
-        ArrowRotate();
+        result = (groundPizza + myPizza)-myPizza;
     }
     private void ArrowRotate()
     {
-        float angle = value * 180;
-        arrowRect.localEulerAngles = new Vector3(0, 0, -angle);
     }
 }
