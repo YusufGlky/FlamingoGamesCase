@@ -11,7 +11,6 @@ public abstract class Playerbase : MonoBehaviour
     [SerializeField] private protected int leftStick;
     [SerializeField] private protected int rightStick;
     [SerializeField] private float balanceValue=0.5f;
-    [SerializeField] private float balanceSpeed;
 
     [Header("Stick")]
     [SerializeField] private List<Transform> leftStickObjects;
@@ -185,29 +184,38 @@ public abstract class Playerbase : MonoBehaviour
         {
             return;
         }
+        float magnitude = Vector3.Magnitude(new Vector3(leftStick, 0, rightStick));
         if (leftStick == rightStick)
         {
-            balanceSpeed -= constantVariables.BalanceChangeDuration*Time.deltaTime;
-            balanceValue = Mathf.MoveTowards(balanceValue, 0.5f, balanceSpeed * Time.deltaTime);
+            balanceValue = Mathf.MoveTowards(balanceValue, 0.5f, constantVariables.BalanceChangeDuration * Time.deltaTime);
+            mAnim.SetBool("leftFoot", false);
+            mAnim.SetBool("rightFoot", false);
         }
         else
         {
             if (leftStick > rightStick)
             {
-                balanceValue = Mathf.MoveTowards(balanceValue, 0, balanceSpeed * Time.deltaTime);
+                balanceValue = Mathf.MoveTowards(balanceValue, 0, constantVariables.BalanceChangeDuration * Time.deltaTime);
+                mAnim.SetBool("leftFoot", true);
+                mAnim.SetBool("rightFoot", false);
             }
             else if (rightStick > leftStick)
             {
-                balanceValue = Mathf.MoveTowards(balanceValue, 1, balanceSpeed * Time.deltaTime);
+                balanceValue = Mathf.MoveTowards(balanceValue, 1, constantVariables.BalanceChangeDuration * Time.deltaTime);
+                mAnim.SetBool("rightFoot", true);
+                mAnim.SetBool("leftFoot", false);
             }
-            balanceSpeed += constantVariables.BalanceChangeDuration * Time.deltaTime;
         }
-        balanceSpeed = Mathf.Clamp(balanceSpeed, 0, 1);
         Overlay.Singleton.BalanceMeteer(balanceValue);
+        PlayerBalance();
         if (balanceValue <= -1 || balanceValue >= 1)
         {
             Death();
         }
+    }
+    private void PlayerBalance()
+    {
+        transform.localEulerAngles = new Vector3(0, 0, -(balanceValue*180)+90);
     }
     private void CheckSticks()
     {
@@ -218,6 +226,7 @@ public abstract class Playerbase : MonoBehaviour
         {
             child = leftStickTransform.GetChild(i);
             child.DOLocalMoveY(0.05f * i, constantVariables.ObjectMoveDuration);
+            child.localEulerAngles = Vector3.zero;
             leftStickObjects.Add(child);
         }
         for (int i = 0; i < rightStickTransform.childCount; i++)

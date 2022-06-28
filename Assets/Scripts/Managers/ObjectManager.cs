@@ -26,7 +26,7 @@ public class ObjectManager : MonoSingleton<ObjectManager>
     public void SpawnNewObjectHolder()
     {
         int randomStackCount = 0;
-        if (UnityEngine.Random.Range(0,100)<50&&(LevelManager.Singleton.LeftStickObjects>0||LevelManager.Singleton.RightStickObjects>0))
+        if (UnityEngine.Random.Range(0,80)<50&&(LevelManager.Singleton.LeftStickObjects>0||LevelManager.Singleton.RightStickObjects>0))
         {
             randomStackCount = UnityEngine.Random.Range(Mathf.Clamp(-100, -Mathf.Abs(LevelManager.Singleton.LeftStickObjects + LevelManager.Singleton.RightStickObjects), -1), -1);
         }
