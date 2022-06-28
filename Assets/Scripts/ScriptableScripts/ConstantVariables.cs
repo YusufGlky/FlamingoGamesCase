@@ -7,6 +7,10 @@ public class ConstantVariables : ScriptableObject
 {
     [SerializeField] private int maxStackableObjects;
     [SerializeField] private float balanceChangeDuration;
+    [SerializeField] private float newObjectHolderPosZInterval;
+    [SerializeField] private float objectMoveDuration;
     public int MaxStackableObjects { get => maxStackableObjects; private set => maxStackableObjects = value;}
     public float BalanceChangeDuration { get => balanceChangeDuration; private set => balanceChangeDuration = value;}
+    public float NewObjectHolderPosZInterval { get => newObjectHolderPosZInterval; private set => newObjectHolderPosZInterval = value;}
+    public float ObjectMoveDuration { get => objectMoveDuration; private set => objectMoveDuration = value;}
 }

@@ -10,6 +10,11 @@ public abstract class Playerbase : MonoBehaviour
     [SerializeField] private protected int leftStick;
     [SerializeField] private protected int rightStick;
     [SerializeField] private float balanceValue=0.5f;
+    [Header("Stick")]
+    [SerializeField] private Stack<Transform> leftStickObjects;
+    [SerializeField] private Stack<Transform> rightStickObjects;
+    [SerializeField] private Transform leftStickTransform;
+    [SerializeField] private Transform rightStickTransform;
     #region ConstantVariables
     private protected PlayerValues playerValues;
     private protected ConstantVariables constantVariables;
@@ -17,16 +22,11 @@ public abstract class Playerbase : MonoBehaviour
     #region privateVariables
     private Vector3 _mouseStartPos;
     private Vector3 _mouseEndPos;
-    private int _direction=3;
     #endregion
     private void Awake()
     {
         Setup();
         TestStart();
-    }
-    private void Setup()
-    {
-        GetScriptableObjects();
     }
     private void Update()
     {
@@ -34,61 +34,71 @@ public abstract class Playerbase : MonoBehaviour
         ClaimSystem();
         TestUpdate();
     }
+    private void Setup()
+    {
+        GetScriptableObjects();
+
+        leftStickObjects = new Stack<Transform>();
+        rightStickObjects = new Stack<Transform>();
+    }
     private void ClaimSystem()
     {
         if (LevelManager.Singleton.CurrentObject != null)
         {
-            ClaimObject();
+            ClaimDirection();
         }
     }
-    private void ClaimObject()
+    private void ClaimObject(int direction)
     {
-        int objectAmount = ObjectAmount();
-        switch (ClaimDirection())
+        int objectAmount = ObjectAmount(direction);
+        if (objectAmount != 0)
         {
-            case -1://Left
+            if (direction == -1)
+            {
                 leftStick += objectAmount;
-                BalanceSystem(Mathf.Abs((float)objectAmount / (float)constantVariables.MaxStackableObjects), -1);
-                break;
-            case 0://Death
-                Death();
-                break;
-            case 1://Right
+            }
+            else
+            {
                 rightStick += objectAmount;
-                BalanceSystem(Mathf.Abs((float)objectAmount / (float)constantVariables.MaxStackableObjects), 1);
-                break;
+            }
+            BalanceSystem(Mathf.Abs((float)objectAmount / (float)constantVariables.MaxStackableObjects), direction);
         }
-        _direction = 3;
     }
-    private int ObjectAmount()
+    private int ObjectAmount(int direction)
     {
         int givenObject=0;
-        if (LevelManager.Singleton.CurrentObject.ObjectCount >=0)
+        if (LevelManager.Singleton.CurrentObject.ObjectCount >0)
         {
             givenObject = LevelManager.Singleton.CurrentObject.ObjectCount;
         }
         else
         {
-            if (ClaimDirection() == -1)
+            if (direction == -1)
             {
-                if (leftStick>=LevelManager.Singleton.CurrentObject.ObjectCount)
+                if (leftStick > 0)
                 {
-                    givenObject = LevelManager.Singleton.CurrentObject.ObjectCount;
-                }
-                else
-                {
-                    givenObject = LevelManager.Singleton.CurrentObject.ObjectCount - leftStick;
+                    if (leftStick >= LevelManager.Singleton.CurrentObject.ObjectCount)
+                    {
+                        givenObject = LevelManager.Singleton.CurrentObject.ObjectCount;
+                    }
+                    else
+                    {
+                        givenObject =LevelManager.Singleton.CurrentObject.ObjectCount+ leftStick;
+                    }
                 }
             }
-            else if (ClaimDirection()==1)
+            else if (direction == 1)
             {
-                if (rightStick >= LevelManager.Singleton.CurrentObject.ObjectCount)
+                if (rightStick > 0)
                 {
-                    givenObject = LevelManager.Singleton.CurrentObject.ObjectCount;
-                }
-                else
-                {
-                    givenObject = LevelManager.Singleton.CurrentObject.ObjectCount - rightStick;
+                    if (rightStick >= LevelManager.Singleton.CurrentObject.ObjectCount)
+                    {
+                        givenObject = LevelManager.Singleton.CurrentObject.ObjectCount;
+                    }
+                    else
+                    {
+                        givenObject = LevelManager.Singleton.CurrentObject.ObjectCount + rightStick;
+                    }
                 }
             }
         }
@@ -106,12 +116,11 @@ public abstract class Playerbase : MonoBehaviour
             transform.Translate(Vector3.forward * playerValues.PlayerSpeed*Time.deltaTime);
         }
     }
-    private int ClaimDirection()
+    private void ClaimDirection()
     {
         if (Input.GetMouseButtonDown(0))
         {
             _mouseStartPos = Input.mousePosition;
-            _direction = 3;
         }
         if (Input.GetMouseButtonUp(0))
         {
@@ -120,15 +129,14 @@ public abstract class Playerbase : MonoBehaviour
             {
                 if (_mouseStartPos.x > _mouseEndPos.x)//Left
                 {
-                    _direction = -1;
+                    ClaimObject(-1);
                 }
                 if (_mouseStartPos.x < _mouseEndPos.x)//Right
                 {
-                    _direction = 1;
+                    ClaimObject(1);
                 }
             }
         }
-        return _direction;
     }
     private void BalanceSystem(float value, int direction)
     {
@@ -168,11 +176,9 @@ public abstract class Playerbase : MonoBehaviour
         {
             if (Input.GetKey(KeyCode.LeftArrow))
             {
-                _direction = -1;
             }
             if (Input.GetKey(KeyCode.RightArrow))
             {
-                _direction = 1;
             }
         }
         if (Input.GetKeyDown(KeyCode.A))//LeftStick
@@ -182,5 +188,4 @@ public abstract class Playerbase : MonoBehaviour
         {
         }
     }
-
 }

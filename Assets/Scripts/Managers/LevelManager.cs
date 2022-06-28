@@ -26,6 +26,10 @@ public class LevelManager : MonoSingleton<LevelManager>
     {
         Setup();
     }
+    private void Start()
+    {
+        SpawnNewObjectHolder(new Vector2Int(1, 10));
+    }
     private void Update()
     {
         ObjectToPlayerDistance();
@@ -40,5 +44,9 @@ public class LevelManager : MonoSingleton<LevelManager>
         {
             playerDistance = Mathf.Abs(PlayerTransform.position.z - CurrentObject.transform.position.z);
         }
+    }
+    public void SpawnNewObjectHolder(Vector2Int minMaxExclusive)
+    {
+       CurrentObject=ObjectSpawnManager.Singleton.SpawnObjectAndSetPosition(Random.Range(minMaxExclusive.x, minMaxExclusive.y));
     }
 }
