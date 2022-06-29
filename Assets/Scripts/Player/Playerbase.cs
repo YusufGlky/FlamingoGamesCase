@@ -2,6 +2,7 @@ using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using TMPro;
 using UnityEngine;
 
 public abstract class Playerbase : MonoBehaviour
@@ -23,6 +24,11 @@ public abstract class Playerbase : MonoBehaviour
 
     [Header("Shoe")]
     [SerializeField] private GameObject skate;
+
+    [Header("UI")]
+    [SerializeField] private TextMeshPro leftStickText;
+    [SerializeField] private TextMeshPro rightStickText;
+
     #region ConstantVariables
     private protected PlayerValues playerValues;
     private protected ConstantVariables constantVariables;
@@ -119,6 +125,7 @@ public abstract class Playerbase : MonoBehaviour
                 ObjectMoveToGround(objectAmount, direction);
             }
             UpdateLevelManager();
+            UpdateStickText();
         }
     }
     private void UpdateLevelManager()
@@ -244,6 +251,11 @@ public abstract class Playerbase : MonoBehaviour
             child.DOLocalMoveY(0.05f * i, constantVariables.ObjectMoveDuration);
             rightStickObjects.Add(child);
         }
+    }
+    private void UpdateStickText()
+    {
+        leftStickText.text = leftStick.ToString();
+        rightStickText.text = rightStick.ToString();
     }
     private void ObjectMoveToGround(int count,int direction)
     {
