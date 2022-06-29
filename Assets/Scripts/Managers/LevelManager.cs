@@ -13,6 +13,7 @@ public class LevelManager : MonoSingleton<LevelManager>
     [SerializeField] private Transform finishLine;
     #region Properties
     public Transform PlayerTransform { get => playerTransform; private set => playerTransform = value; }
+    public Transform FinishLine { get => finishLine; private set => finishLine = value; }
     public int LeftStickObjects { get => leftStickObjects; private set => leftStickObjects = value; }
     public int RightStickObjects { get => rightStickObjects; private set => rightStickObjects = value; }
     #endregion

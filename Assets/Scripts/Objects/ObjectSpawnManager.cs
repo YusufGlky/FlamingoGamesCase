@@ -15,13 +15,20 @@ public class ObjectSpawnManager : MonoSingleton<ObjectSpawnManager>
     }
     public ObjectBase SpawnObjectAndSetPosition(int stackCount)
     {
-        Transform newObjectHolder = ObjectPool.Singleton.GetObject("pizzaBoxHolder", 0).transform;
-        newObjectHolder.position = LevelManager.Singleton.PlayerTransform.position + new Vector3(0, 0, _constantVariables.NewObjectHolderPosZInterval);
-        newObjectHolder.SetParent(null);
+        if ((LevelManager.Singleton.PlayerTransform.position + new Vector3(0, 0, _constantVariables.NewObjectHolderPosZInterval)).z < LevelManager.Singleton.FinishLine.position.z)
+        {
+            Transform newObjectHolder = ObjectPool.Singleton.GetObject("pizzaBoxHolder", 0).transform;
+            newObjectHolder.position = LevelManager.Singleton.PlayerTransform.position + new Vector3(0, 0, _constantVariables.NewObjectHolderPosZInterval);
+            newObjectHolder.SetParent(null);
 
-        ObjectBase tempBase = newObjectHolder.GetComponent<ObjectBase>();
-        PrepareObjectHolder(tempBase, stackCount);
-        return tempBase;
+            ObjectBase tempBase = newObjectHolder.GetComponent<ObjectBase>();
+            PrepareObjectHolder(tempBase, stackCount);
+            return tempBase;
+        }
+        else
+        {
+            return null;
+        }
     }
     private void PrepareObjectHolder(ObjectBase objectBase, int stackCount)
     {
