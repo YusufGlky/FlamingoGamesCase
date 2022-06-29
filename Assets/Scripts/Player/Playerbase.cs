@@ -242,20 +242,26 @@ public abstract class Playerbase : MonoBehaviour
     }
     private void CheckSticks()
     {
-        leftStickObjects.Clear();
-        rightStickObjects.Clear();
+       // leftStickObjects.Clear();
+       // rightStickObjects.Clear();
         Transform child = null;
         for (int i = 0; i < leftStickTransform.childCount; i++)
         {
             child = leftStickTransform.GetChild(i);
             child.DOLocalMoveY(0.05f * i, constantVariables.ObjectMoveDuration);
-            leftStickObjects.Add(child);
+            if (!leftStickObjects.Contains(child))
+            {
+                leftStickObjects.Add(child);
+            }
         }
         for (int i = 0; i < rightStickTransform.childCount; i++)
         {
             child = rightStickTransform.GetChild(i);
             child.DOLocalMoveY(0.05f * i, constantVariables.ObjectMoveDuration);
-            rightStickObjects.Add(child);
+            if (!rightStickObjects.Contains(child))
+            {
+                rightStickObjects.Add(child);
+            }
         }
     }
     private void UpdateStickText()
@@ -288,9 +294,19 @@ public abstract class Playerbase : MonoBehaviour
             }
             removedList.Add(child);
         }
-        for (int i = 0; i < removedList.Count; i++)
+        if (direction == -1)
         {
-            leftStickObjects.Remove(removedList[i]);
+            for (int i = 0; i < removedList.Count; i++)
+            {
+                leftStickObjects.Remove(removedList[i]);
+            }
+        }
+        else
+        {
+            for (int i = 0; i < removedList.Count; i++)
+            {
+                rightStickObjects.Remove(removedList[i]);
+            }
         }
     }
     private void Death()
@@ -339,11 +355,8 @@ public abstract class Playerbase : MonoBehaviour
                 mAnim.SetBool("idle", true);
                 skate.SetActive(false);
                 transform.DOLocalRotate(Vector3.zero, 1);
-                DOVirtual.DelayedCall(0.2f, () =>
-                 {
-                     moveable = false;
-                     Gamemanager.Singleton.Victory();
-                 });
+                moveable = false;
+                Gamemanager.Singleton.Victory();
             }
         }
     }

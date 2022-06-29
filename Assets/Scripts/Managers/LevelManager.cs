@@ -59,7 +59,7 @@ public class LevelManager : MonoSingleton<LevelManager>
     }
     private void Victory()
     {
-        DOVirtual.DelayedCall(0.6f, () =>
+        DOVirtual.DelayedCall(1, () =>
          {
              SceneController.Singleton.LoadLevel(0);
          });

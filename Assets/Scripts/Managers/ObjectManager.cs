@@ -17,7 +17,7 @@ public class ObjectManager : MonoSingleton<ObjectManager>
     private void Setup()
     {
         SpawnNewObjectHolder();
-        DOTween.SetTweensCapacity(2500, 2500);
+        DOTween.SetTweensCapacity(1000, 1000);
     }
     public void MoveFinisher()
     {
@@ -26,13 +26,13 @@ public class ObjectManager : MonoSingleton<ObjectManager>
     public void SpawnNewObjectHolder()
     {
         int randomStackCount = 0;
-        if (UnityEngine.Random.Range(0,80)<50&&(LevelManager.Singleton.LeftStickObjects>0||LevelManager.Singleton.RightStickObjects>0))
+        if ((UnityEngine.Random.Range(0,100)<35&&(LevelManager.Singleton.LeftStickObjects>0||LevelManager.Singleton.RightStickObjects>0))||LevelManager.Singleton.LeftStickObjects+ LevelManager.Singleton.RightStickObjects>25)
         {
             randomStackCount = UnityEngine.Random.Range(Mathf.Clamp(-25, -Mathf.Abs(LevelManager.Singleton.LeftStickObjects + LevelManager.Singleton.RightStickObjects), -1), -1);
         }
         else
         {
-            randomStackCount = UnityEngine.Random.Range(1, Mathf.Min(LevelManager.Singleton.LeftStickObjects, LevelManager.Singleton.RightStickObjects) + 15);
+            randomStackCount =Mathf.Clamp(UnityEngine.Random.Range(1, Mathf.Min(LevelManager.Singleton.LeftStickObjects, LevelManager.Singleton.RightStickObjects) + 8),1,22);
         }
         CurrentObject = ObjectSpawnManager.Singleton.SpawnObjectAndSetPosition(randomStackCount);
     }

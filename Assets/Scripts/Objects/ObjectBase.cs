@@ -40,9 +40,10 @@ public abstract class ObjectBase : MonoBehaviour,IPooledObject
             for (int i = 0; i < stackCount; i++)
             {
                 Transform tempObject = ObjectPool.Singleton.GetObject(objectPoolType, objectPoolId).transform;
+                tempObject.localEulerAngles = Vector3.zero;
                 tempObject.GetComponent<StackedObjects>().DisableComponents();
                 tempObject.SetParent(transform);
-                tempObject.DOScale(Vector3.one, 0.3f);
+                tempObject.localScale = Vector3.one;
                 tempObject.localPosition = Vector3.zero;
                 myObjects.Add(tempObject);
             }
@@ -142,7 +143,8 @@ public abstract class ObjectBase : MonoBehaviour,IPooledObject
 
         tempObject.SetParent(target);
         tempObject.localEulerAngles = new Vector3(0, 180, 0);
-        tempObject.DOScale(tempObject.localScale / 2, _constantVariables.ObjectMoveDuration);
+        tempObject.localScale = Vector3.one * 0.5f;
+       //tempObject.DOScale(tempObject.localScale / 2, _constantVariables.ObjectMoveDuration).OnComplete(()=>tempObject.localScale= tempObject.localScale / 2);
         tempObject.DOLocalMove(Vector3.zero, _constantVariables.ObjectMoveDuration);
     }
     private void CreateNewHolderAndReturnPool()
@@ -166,6 +168,6 @@ public abstract class ObjectBase : MonoBehaviour,IPooledObject
     private void ScaleAnim()
     {
         transform.localScale = Vector3.zero;
-        transform.DOScale(Vector3.one, 0.3f);
+        transform.DOScale(Vector3.one, 0.3f).OnComplete(()=>transform.localScale=Vector3.one);
     }
 }
