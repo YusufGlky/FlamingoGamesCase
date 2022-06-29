@@ -32,6 +32,9 @@ public abstract class Playerbase : MonoBehaviour
     [Header("ObjectBalance")]
     [SerializeField] private Rigidbody leftStickBody;
     [SerializeField] private Rigidbody rightStickBody;
+
+    [Header("Ragdoll")]
+    [SerializeField] private List<Rigidbody> myRagdollRigidbody;
     #region ConstantVariables
     private protected PlayerValues playerValues;
     private protected ConstantVariables constantVariables;
@@ -228,7 +231,7 @@ public abstract class Playerbase : MonoBehaviour
         }
         Overlay.Singleton.BalanceMeteer(balanceValue);
         PlayerBalance();
-        if (balanceValue <= 0 || balanceValue >= 1)
+        if (balanceValue <= 0.1f || balanceValue >= 0.9f)
         {
             Death();
         }
@@ -298,6 +301,7 @@ public abstract class Playerbase : MonoBehaviour
             {
                 moveable = false;
                 mAnim.enabled = false;
+                stickBody.transform.SetParent(null);
                 stickBody.constraints = RigidbodyConstraints.None;
                 stickBody.isKinematic = false;
                 leftStickText.gameObject.SetActive(false);
@@ -311,6 +315,13 @@ public abstract class Playerbase : MonoBehaviour
                 {
                     rightStickObjects[i].SetParent(null);
                     rightStickObjects[i].GetComponent<StackedObjects>().EnableComponents();
+                }
+                for (int i = 0; i < myRagdollRigidbody.Count; i++)
+                {
+                    myRagdollRigidbody[i].velocity = Vector3.zero;
+                    myRagdollRigidbody[i].angularVelocity = Vector3.zero;
+                    myRagdollRigidbody[i].useGravity = true;
+                    myRagdollRigidbody[i].isKinematic =false;
                 }
                 Gamemanager.Singleton.Failed();
             }
@@ -328,7 +339,7 @@ public abstract class Playerbase : MonoBehaviour
                 mAnim.SetBool("idle", true);
                 skate.SetActive(false);
                 transform.DOLocalRotate(Vector3.zero, 1);
-                DOVirtual.DelayedCall(0.5f, () =>
+                DOVirtual.DelayedCall(0.2f, () =>
                  {
                      moveable = false;
                      Gamemanager.Singleton.Victory();

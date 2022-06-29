@@ -23,6 +23,7 @@ public class StackedObjects : MonoBehaviour,IPooledObject
     {
         _mCollider.enabled = true;
         _mRigidbody.isKinematic = false;
+        _mRigidbody.useGravity = true;
         _mRigidbody.constraints = RigidbodyConstraints.None;
     }
     public void DisableComponents()
