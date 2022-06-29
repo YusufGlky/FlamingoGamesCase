@@ -29,6 +29,9 @@ public abstract class Playerbase : MonoBehaviour
     [SerializeField] private TextMeshPro leftStickText;
     [SerializeField] private TextMeshPro rightStickText;
 
+    [Header("ObjectBalance")]
+    [SerializeField] private Rigidbody leftStickBody;
+    [SerializeField] private Rigidbody rightStickBody;
     #region ConstantVariables
     private protected PlayerValues playerValues;
     private protected ConstantVariables constantVariables;
@@ -58,6 +61,7 @@ public abstract class Playerbase : MonoBehaviour
         ClaimSystem();
         BalanceSystem();
         Victory();
+        UpdateStickRotation();
     }
     private void OnTriggerEnter(Collider other)
     {
@@ -203,7 +207,7 @@ public abstract class Playerbase : MonoBehaviour
         }
         if (leftStick == rightStick)
         {
-            balanceValue = Mathf.MoveTowards(balanceValue, 0.5f, constantVariables.BalanceChangeDuration*0.5f* Time.deltaTime);
+            balanceValue = Mathf.MoveTowards(balanceValue, 0.5f, constantVariables.BalanceChangeScale*0.5f* Time.deltaTime);
             mAnim.SetBool("leftFoot", false);
             mAnim.SetBool("rightFoot", false);
         }
@@ -211,13 +215,13 @@ public abstract class Playerbase : MonoBehaviour
         {
             if (leftStick > rightStick)
             {
-                balanceValue = Mathf.MoveTowards(balanceValue, 0, constantVariables.BalanceChangeDuration* ((float)leftStick/100) * Time.deltaTime);
+                balanceValue = Mathf.MoveTowards(balanceValue, 0, constantVariables.BalanceChangeScale * ((float)(leftStick-rightStick)/100) * Time.deltaTime);
                 mAnim.SetBool("leftFoot", true);
                 mAnim.SetBool("rightFoot", false);
             }
             else if (rightStick > leftStick)
             {
-                balanceValue = Mathf.MoveTowards(balanceValue, 1, constantVariables.BalanceChangeDuration * ((float)rightStick / 100) * Time.deltaTime);
+                balanceValue = Mathf.MoveTowards(balanceValue, 1, constantVariables.BalanceChangeScale * ((float)(rightStick-leftStick)/ 100) * Time.deltaTime);
                 mAnim.SetBool("rightFoot", true);
                 mAnim.SetBool("leftFoot", false);
             }
@@ -242,13 +246,14 @@ public abstract class Playerbase : MonoBehaviour
         {
             child = leftStickTransform.GetChild(i);
             child.DOLocalMoveY(0.05f * i, constantVariables.ObjectMoveDuration);
-            child.localEulerAngles = Vector3.zero;
+            child.GetComponent<StackedObjects>().SetHingeJoint(leftStickBody);
             leftStickObjects.Add(child);
         }
         for (int i = 0; i < rightStickTransform.childCount; i++)
         {
             child = rightStickTransform.GetChild(i);
             child.DOLocalMoveY(0.05f * i, constantVariables.ObjectMoveDuration);
+            child.GetComponent<StackedObjects>().SetHingeJoint(rightStickBody);
             rightStickObjects.Add(child);
         }
     }
@@ -256,6 +261,11 @@ public abstract class Playerbase : MonoBehaviour
     {
         leftStickText.text = leftStick.ToString();
         rightStickText.text = rightStick.ToString();
+    }
+    private void UpdateStickRotation()
+    {
+        leftStickText.transform.localEulerAngles = new Vector3(0, 0, (balanceValue * 180)-90);
+        rightStickText.transform.localEulerAngles = new Vector3(0, 0, (balanceValue * 180)-90);
     }
     private void ObjectMoveToGround(int count,int direction)
     {
@@ -292,6 +302,8 @@ public abstract class Playerbase : MonoBehaviour
                 mAnim.enabled = false;
                 stickBody.constraints = RigidbodyConstraints.None;
                 stickBody.isKinematic = false;
+                leftStickText.gameObject.SetActive(false);
+                rightStickText.gameObject.SetActive(false);
                 for (int i = 0; i < leftStickObjects.Count; i++)
                 {
                     leftStickObjects[i].SetParent(null);

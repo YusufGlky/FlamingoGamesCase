@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: ConstantVariables
   m_EditorClassIdentifier: 
   maxStackableObjects: 100
-  balanceChangeDuration: 1
+  balanceChangeScale: 0.6
   newObjectHolderPosZInterval: 25
   objectMoveDuration: 0.23
   objectMoveDelay: 0.02

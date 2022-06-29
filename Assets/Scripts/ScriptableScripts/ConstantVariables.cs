@@ -6,7 +6,7 @@ using UnityEngine;
 public class ConstantVariables : ScriptableObject
 {
     [SerializeField] private int maxStackableObjects;
-    [SerializeField] private float balanceChangeDuration;
+    [SerializeField] private float balanceChangeScale;
     [SerializeField] private float newObjectHolderPosZInterval;
 
     [Header("Object")]
@@ -17,7 +17,7 @@ public class ConstantVariables : ScriptableObject
     [Header("UI")]
     [SerializeField] private float uiAnimDurations;
     public int MaxStackableObjects { get => maxStackableObjects; private set => maxStackableObjects = value;}
-    public float BalanceChangeDuration { get => balanceChangeDuration; private set => balanceChangeDuration = value;}
+    public float BalanceChangeScale { get => balanceChangeScale; private set => balanceChangeScale = value;}
     public float NewObjectHolderPosZInterval { get => newObjectHolderPosZInterval; private set => newObjectHolderPosZInterval = value;}
     public float ObjectMoveDuration { get => objectMoveDuration; private set => objectMoveDuration = value;}
     public float ObjectMoveDelay { get => objectMoveDelay; private set => objectMoveDelay = value;}

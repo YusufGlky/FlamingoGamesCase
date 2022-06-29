@@ -141,6 +141,7 @@ public abstract class ObjectBase : MonoBehaviour,IPooledObject
         }
 
         tempObject.SetParent(target);
+        tempObject.localEulerAngles = new Vector3(0, 180, 0);
         tempObject.DOScale(tempObject.localScale / 2, _constantVariables.ObjectMoveDuration);
         tempObject.DOLocalMove(Vector3.zero, _constantVariables.ObjectMoveDuration);
     }
