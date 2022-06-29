@@ -157,7 +157,6 @@ public abstract class Playerbase : MonoBehaviour
                 }
             }
         }
-        Debug.LogError("GivenObject:" + givenObject);
         return givenObject;
     }
     private void Movement()
@@ -197,7 +196,7 @@ public abstract class Playerbase : MonoBehaviour
         }
         if (leftStick == rightStick)
         {
-            balanceValue = Mathf.MoveTowards(balanceValue, 0.5f, constantVariables.BalanceChangeDuration* Time.deltaTime);
+            balanceValue = Mathf.MoveTowards(balanceValue, 0.5f, constantVariables.BalanceChangeDuration*0.5f* Time.deltaTime);
             mAnim.SetBool("leftFoot", false);
             mAnim.SetBool("rightFoot", false);
         }
@@ -205,7 +204,6 @@ public abstract class Playerbase : MonoBehaviour
         {
             if (leftStick > rightStick)
             {
-                Debug.LogError("Left:" + (leftStick / 100));
                 balanceValue = Mathf.MoveTowards(balanceValue, 0, constantVariables.BalanceChangeDuration* ((float)leftStick/100) * Time.deltaTime);
                 mAnim.SetBool("leftFoot", true);
                 mAnim.SetBool("rightFoot", false);
@@ -219,7 +217,7 @@ public abstract class Playerbase : MonoBehaviour
         }
         Overlay.Singleton.BalanceMeteer(balanceValue);
         PlayerBalance();
-        if (balanceValue <= -1 || balanceValue >= 1)
+        if (balanceValue <= 0 || balanceValue >= 1)
         {
             Death();
         }
