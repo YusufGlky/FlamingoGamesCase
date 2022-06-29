@@ -13,6 +13,7 @@ public abstract class Playerbase : MonoBehaviour
     [SerializeField] private float balanceValue=0.5f;
 
     [Header("Stick")]
+    [SerializeField] private Rigidbody stickBody;
     [SerializeField] private List<Transform> leftStickObjects;
     [SerializeField] private List<Transform> rightStickObjects;
     [SerializeField] private Transform leftStickTransform;
@@ -263,6 +264,31 @@ public abstract class Playerbase : MonoBehaviour
     }
     private void Death()
     {
-        //To Do: Death
+        moveable = false;
+        mAnim.enabled = false;
+        stickBody.constraints = RigidbodyConstraints.None;
+        stickBody.isKinematic = false;
+        for (int i = 0; i < leftStickObjects.Count; i++)
+        {
+            leftStickObjects[i].SetParent(null);
+            leftStickObjects[i].GetComponent<StackedObjects>().EnableComponents();
+        }
+        for (int i = 0; i < rightStickObjects.Count; i++)
+        {
+            rightStickObjects[i].SetParent(null);
+            rightStickObjects[i].GetComponent<StackedObjects>().EnableComponents();
+        }
+        Gamemanager.Singleton.Failed();
+    }
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.CompareTag("Object"))
+        {
+            Death();
+        }
+    }
+    private void CollideObjects(GameObject collideObject)
+    {
+
     }
 }
