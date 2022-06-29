@@ -1,3 +1,4 @@
+using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -28,13 +29,39 @@ public class LevelManager : MonoSingleton<LevelManager>
     {
         Setup();
     }
+    private void OnEnable()
+    {
+        SetActions(true);
+    }
+    private void OnDisable()
+    {
+        SetActions(false);
+    }
     public void UpdateStickObjectCount(int leftStick, int rightStick)
     {
         LeftStickObjects = leftStick;
         RightStickObjects = rightStick;
     }
+    private void SetActions(bool enabled)
+    {
+        if (enabled)
+        {
+            Gamemanager.VictoryAction += Victory;
+        }
+        else
+        {
+            Gamemanager.VictoryAction -= Victory;
+        }
+    }
     private void Setup()
     {
         PlayerTransform = FindObjectOfType<Playerbase>().transform;
+    }
+    private void Victory()
+    {
+        DOVirtual.DelayedCall(0.6f, () =>
+         {
+             SceneController.Singleton.LoadLevel(0);
+         });
     }
 }

@@ -7,6 +7,8 @@ using UnityEngine;
 public abstract class Playerbase : MonoBehaviour
 {
     [SerializeField] private protected bool moveable;
+    [SerializeField] private protected bool victory;
+
     [Header("Balance")]
     [SerializeField] private protected int leftStick;
     [SerializeField] private protected int rightStick;
@@ -49,6 +51,14 @@ public abstract class Playerbase : MonoBehaviour
         Movement();
         ClaimSystem();
         BalanceSystem();
+        Victory();
+    }
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.CompareTag("Object"))
+        {
+            Death();
+        }
     }
     private void Setup()
     {
@@ -185,10 +195,9 @@ public abstract class Playerbase : MonoBehaviour
         {
             return;
         }
-        float magnitude = Vector3.Magnitude(new Vector3(leftStick, 0, rightStick));
         if (leftStick == rightStick)
         {
-            balanceValue = Mathf.MoveTowards(balanceValue, 0.5f, constantVariables.BalanceChangeDuration * Time.deltaTime);
+            balanceValue = Mathf.MoveTowards(balanceValue, 0.5f, constantVariables.BalanceChangeDuration* Time.deltaTime);
             mAnim.SetBool("leftFoot", false);
             mAnim.SetBool("rightFoot", false);
         }
@@ -196,13 +205,14 @@ public abstract class Playerbase : MonoBehaviour
         {
             if (leftStick > rightStick)
             {
-                balanceValue = Mathf.MoveTowards(balanceValue, 0, constantVariables.BalanceChangeDuration * Time.deltaTime);
+                Debug.LogError("Left:" + (leftStick / 100));
+                balanceValue = Mathf.MoveTowards(balanceValue, 0, constantVariables.BalanceChangeDuration* ((float)leftStick/100) * Time.deltaTime);
                 mAnim.SetBool("leftFoot", true);
                 mAnim.SetBool("rightFoot", false);
             }
             else if (rightStick > leftStick)
             {
-                balanceValue = Mathf.MoveTowards(balanceValue, 1, constantVariables.BalanceChangeDuration * Time.deltaTime);
+                balanceValue = Mathf.MoveTowards(balanceValue, 1, constantVariables.BalanceChangeDuration * ((float)rightStick / 100) * Time.deltaTime);
                 mAnim.SetBool("rightFoot", true);
                 mAnim.SetBool("leftFoot", false);
             }
@@ -264,31 +274,46 @@ public abstract class Playerbase : MonoBehaviour
     }
     private void Death()
     {
-        moveable = false;
-        mAnim.enabled = false;
-        stickBody.constraints = RigidbodyConstraints.None;
-        stickBody.isKinematic = false;
-        for (int i = 0; i < leftStickObjects.Count; i++)
+        if (ObjectManager.Singleton.CurrentObject != null)
         {
-            leftStickObjects[i].SetParent(null);
-            leftStickObjects[i].GetComponent<StackedObjects>().EnableComponents();
+            if (!ObjectManager.Singleton.CurrentObject.IsUsed)
+            {
+                moveable = false;
+                mAnim.enabled = false;
+                stickBody.constraints = RigidbodyConstraints.None;
+                stickBody.isKinematic = false;
+                for (int i = 0; i < leftStickObjects.Count; i++)
+                {
+                    leftStickObjects[i].SetParent(null);
+                    leftStickObjects[i].GetComponent<StackedObjects>().EnableComponents();
+                }
+                for (int i = 0; i < rightStickObjects.Count; i++)
+                {
+                    rightStickObjects[i].SetParent(null);
+                    rightStickObjects[i].GetComponent<StackedObjects>().EnableComponents();
+                }
+                Gamemanager.Singleton.Failed();
+            }
         }
-        for (int i = 0; i < rightStickObjects.Count; i++)
-        {
-            rightStickObjects[i].SetParent(null);
-            rightStickObjects[i].GetComponent<StackedObjects>().EnableComponents();
-        }
-        Gamemanager.Singleton.Failed();
     }
-    private void OnTriggerEnter(Collider other)
+    private void Victory()
     {
-        if (other.gameObject.CompareTag("Object"))
+        if (moveable&&!victory)
         {
-            Death();
+            if (transform.position.z > LevelManager.Singleton.FinishLine.position.z)
+            {
+                victory = true;
+                mAnim.SetBool("leftFoot", false);
+                mAnim.SetBool("rightFoot", false);
+                mAnim.SetBool("idle", true);
+                skate.SetActive(false);
+                transform.DOLocalRotate(Vector3.zero, 1);
+                DOVirtual.DelayedCall(0.5f, () =>
+                 {
+                     moveable = false;
+                     Gamemanager.Singleton.Victory();
+                 });
+            }
         }
-    }
-    private void CollideObjects(GameObject collideObject)
-    {
-
     }
 }

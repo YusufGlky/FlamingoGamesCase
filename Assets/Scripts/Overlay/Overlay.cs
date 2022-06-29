@@ -14,6 +14,9 @@ public class Overlay : MonoSingleton<Overlay>
     [Header("RetryButton")]
     [SerializeField] private RectTransform retryButton;
     [Tooltip("Anchor Pos")][SerializeField] private float retryButtonYPos;
+
+    [Header("Victory")]
+    [SerializeField] private RectTransform victoryRect;
     #region ConstantVariables
     private ConstantVariables _constantVariables;
     #endregion
@@ -48,10 +51,12 @@ public class Overlay : MonoSingleton<Overlay>
         if (enabled)
         {
             Gamemanager.FailedAction += Failed;
+            Gamemanager.VictoryAction += Victory;
         }
         else
         {
             Gamemanager.FailedAction -= Failed;
+            Gamemanager.VictoryAction -= Victory;
         }
     }
     private void Setup()
@@ -62,6 +67,10 @@ public class Overlay : MonoSingleton<Overlay>
     {
         _constantVariables = Resources.Load<ConstantVariables>("ScriptableObjects/ConstantVariables");
     }
+    private void Victory()
+    {
+        VictoryTextEffect();
+    }
     private void Failed()
     {
         RetryButtonAnimator();
@@ -69,5 +78,14 @@ public class Overlay : MonoSingleton<Overlay>
     private void RetryButtonAnimator()
     {
         retryButton.DOAnchorPosY(retryButtonYPos, _constantVariables.UIAnimDurations);
+    }
+    private void VictoryTextEffect()
+    {
+        meteerParent.gameObject.SetActive(false);
+        victoryRect.gameObject.SetActive(true);
+        victoryRect.DOScale(Vector2.one, _constantVariables.UIAnimDurations).OnComplete(()=>
+        {
+            victoryRect.DOPunchScale(Vector2.one * .1f, 0.1f, 1, 1);
+        });
     }
 }
