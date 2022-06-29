@@ -246,14 +246,12 @@ public abstract class Playerbase : MonoBehaviour
         {
             child = leftStickTransform.GetChild(i);
             child.DOLocalMoveY(0.05f * i, constantVariables.ObjectMoveDuration);
-            child.GetComponent<StackedObjects>().SetHingeJoint(leftStickBody);
             leftStickObjects.Add(child);
         }
         for (int i = 0; i < rightStickTransform.childCount; i++)
         {
             child = rightStickTransform.GetChild(i);
             child.DOLocalMoveY(0.05f * i, constantVariables.ObjectMoveDuration);
-            child.GetComponent<StackedObjects>().SetHingeJoint(rightStickBody);
             rightStickObjects.Add(child);
         }
     }

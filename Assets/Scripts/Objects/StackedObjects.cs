@@ -6,7 +6,6 @@ public class StackedObjects : MonoBehaviour,IPooledObject
 {
     private Collider _mCollider;
     private Rigidbody _mRigidbody;
-    private HingeJoint _mHingeJoint;
     #region PoolId
     public string PoolType { get; set; }
     public int PoolId { get; set; }
@@ -19,19 +18,6 @@ public class StackedObjects : MonoBehaviour,IPooledObject
     {
         _mCollider = GetComponent<Collider>();
         _mRigidbody = GetComponent<Rigidbody>();
-        _mHingeJoint = GetComponent<HingeJoint>();
-    }
-    public void SetHingeJoint(Rigidbody connectedBody)
-    {
-        _mHingeJoint.connectedBody = connectedBody;
-    }
-    public void EnableHingeJoint()
-    {
-
-    }
-    public void DisableHingeJoint()
-    {
-
     }
     public void EnableComponents()
     {
